@@ -1,4 +1,4 @@
-Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
+Genomesite_comparison <- function(lt, up_nt, down_nt, applyParallel=F, core=4){
   # setting start time 
   start.time <- Sys.time()
   
@@ -7,8 +7,8 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
   require(parallel)
   
   # dataset preprocess
-  colnames(lt[["anchor"]]) <- c("ID", "CHR", "start", "end", "strand")
-  colnames(lt[["target"]]) <- c("ID", "CHR", "start", "end", "strand")
+  colnames(lt[["anchor"]]) <- c("id", "chr", "start", "end", "strand")
+  colnames(lt[["target"]]) <- c("id", "chr", "start", "end", "strand")
   lt[["anchor"]]$start <- lt[["anchor"]]$start %>% as.numeric()
   lt[["anchor"]]$end <- lt[["anchor"]]$end %>% as.numeric()
   lt[["target"]]$start <- lt[["target"]]$start %>% as.numeric()
@@ -50,8 +50,8 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
     ## dataset setting 
     range.df <- anchor.df %>% 
       mutate(
-        "forward" = anchor.df$start-f_nt,
-        "backward" = anchor.df$end+b_nt
+        "upstream" = anchor.df$start-up_nt,
+        "downstream" = anchor.df$end+down_nt
       )
     output.df <- cbind(
       target.df[1,1:5],
@@ -63,10 +63,10 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
     ## compare
     for (i in 1:nrow(range.df)) {
       overlap.df <- c(
-        target.df$CHR == range.df$CHR[i] &
+        target.df$chr == range.df$chr[i] &
           target.df$strand == range.df$strand[i] &
-          target.df$start <= range.df$backward[i] & 
-          target.df$end >= range.df$forward[i] 
+          target.df$start <= range.df$downstream[i] & 
+          target.df$end >= range.df$upstream[i] 
       ) %>% target.df[.,]
       
       if(nrow(overlap.df)>0){
@@ -85,8 +85,8 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
     return(output.df)
   }
   applied.env <- new.env()
-  applied.env[["f_nt"]] <- f_nt
-  applied.env[["b_nt"]] <- b_nt
+  applied.env[["up_nt"]] <- up_nt
+  applied.env[["down_nt"]] <- down_nt
   applied.env[["anchor.df"]] <- lt[["anchor"]]
 
   # comparison analysis
@@ -94,8 +94,8 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
 
     cl <- makeCluster(core)
     
-    clusterExport(cl, "f_nt", envir = applied.env)
-    clusterExport(cl, "b_nt", envir = applied.env)
+    clusterExport(cl, "up_nt", envir = applied.env)
+    clusterExport(cl, "down_nt", envir = applied.env)
     clusterExport(cl, "anchor.df", envir = applied.env)
     output.lt <- parLapply(
       cl, p_lt, applied.FUN
@@ -112,12 +112,12 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
         )
       }
     }
-    output.df <- output.df %>% arrange(A_ID)
+    output.df <- output.df %>% arrange(A_id)
 
   }else{
     anchor.df <- lt[["anchor"]]
     output.df <- applied.FUN(lt)
-    output.df <- output.df %>% arrange(A_ID)
+    output.df <- output.df %>% arrange(A_id)
   }
   
   print(Sys.time()-start.time)
