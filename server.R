@@ -4,14 +4,15 @@ options(shiny.maxRequestSize=30*1024^2)
 server <- function(input, output, session) {
   
   # Start time
-  start_time <- eventReactive(c(input$DoSearch, input$DoExample),{
-    cat("start_time\n")
-    t1 <- proc.time()
-  })
+  # start_time <- eventReactive(c(input$DoSearch, input$DoExample),{
+  #   cat("start_time\n")
+  #   t1 <- proc.time()
+  # })
   
   # Anchor and Target table input 
-  Anchor_Table <- eventReactive(c(input$anchor_file, input$DoExample),{
+  Anchor_Table <- eventReactive(c(input$DoSearch, input$anchor_file, input$DoExample),{
     cat("Anchor_Table\n")
+    t1 <- proc.time()
     tryCatch(
       {
         if(!is.null(input$anchor_file$datapath)){
@@ -26,9 +27,12 @@ server <- function(input, output, session) {
         anchor.df <- NULL
       }
     )
-    anchor.df
+    list(
+      "anchor"=anchor.df,
+      "t1"=t1
+    )
   })
-  Target_Table <- eventReactive(c(input$target_file, input$DoExample),{
+  Target_Table <- eventReactive(c(input$DoSearch, input$target_file, input$DoExample),{
     cat("Target_Table\n")
     tryCatch(
       {
@@ -50,8 +54,10 @@ server <- function(input, output, session) {
   # Comparison  
   output_Table <- eventReactive(c(input$DoSearch, input$DoExample),{
     cat("output_Table\n")
-    start_time()
-    anchor.df <- Anchor_Table()
+    #start_time()
+    anchor.lt <- Anchor_Table()
+    anchor.df <- anchor.lt$anchor
+    t1 <- anchor.lt$t1
     target.df <- Target_Table()
     
     output.df <- NULL
@@ -82,19 +88,28 @@ server <- function(input, output, session) {
         cat("err")
       }
     )
-    output.df
-  })
-  
-  # End time 
-  print_time <- eventReactive(c(input$DoSearch, input$DoExample),{
-    cat("print_time\n")
-    t1 <- start_time()
+    
     t2 <- proc.time()
     t <- t2-t1
     print_time <- paste0("Execution time: ",round(t[3][[1]],2), " s")
     
-    print_time
+    list(
+      "output" = output.df,
+      "time" = print_time
+    )
+    
   })
+  
+  # End time 
+  # print_time <- eventReactive(c(input$DoSearch, input$DoExample),{
+  #   cat("print_time\n")
+  #   t1 <- start_time()
+  #   t2 <- proc.time()
+  #   t <- t2-t1
+  #   print_time <- paste0("Execution time: ",round(t[3][[1]],2), " s")
+  #   
+  #   print_time
+  # })
   
   ## Check
   # info <- NULL
@@ -136,7 +151,7 @@ server <- function(input, output, session) {
 
   
   output$output_table <- renderDataTable(
-    output_Table(),
+    output_Table()[[1]],
     options = list(
       pageLength = 25,
       searching = T,
@@ -146,7 +161,7 @@ server <- function(input, output, session) {
   )
   
   output$print_time <- renderUI(
-    print_time()
+    output_Table()[[2]]
   )
   
 }
