@@ -55,7 +55,7 @@ ui <- navbarPage(
         column(
           selectInput(
             "DoParallel",h6(strong("Parallel calculating"),style = "color:#97CBFF"),
-            choices = c("TRUE", "FALSE")
+            choices = c("True", "False"),selected = "False"
           ),
           width = 6
         ),
@@ -102,7 +102,17 @@ ui <- navbarPage(
           h5("Comparison result",style = "color:#97CBFF"),
           dataTableOutput("output_table"),
           width = 1
-        )
+        ),
+        tabPanel(
+          h5("Target teble",style = "color:#97CBFF"),
+          dataTableOutput("target_table"),
+          width = 1
+        ),
+        tabPanel(
+          h5("Anchor teble",style = "color:#97CBFF"),
+          dataTableOutput("anchor_table"),
+          width = 1
+        ),
       ),
       width = 9
     )

@@ -160,6 +160,26 @@ server <- function(input, output, session) {
     escape = FALSE
   )
   
+  output$anchor_table <- renderDataTable(
+    Anchor_Table()[[1]],
+    options = list(
+      pageLength = 25,
+      searching = T,
+      row.names = F
+    ),
+    escape = FALSE
+  )
+  
+  output$target_table <- renderDataTable(
+    Target_Table(),
+    options = list(
+      pageLength = 25,
+      searching = T,
+      row.names = F
+    ),
+    escape = FALSE
+  )
+  
   output$print_time <- renderUI(
     output_Table()[[2]]
   )
