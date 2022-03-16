@@ -38,15 +38,15 @@ ui <- navbarPage(
       fluidRow(
         column(
           numericInput(
-            "f_nt",h6(strong("Forward range (nt)"),style = "color:#97CBFF"),
-            value = 20, min = 1, max = 100000
+            "f_nt",h6(strong("Upstream range"),style = "color:#97CBFF"),
+            value = 20, min = 0, max = 1000000
           ),
           width = 6
         ),
         column(
           numericInput(
-            "b_nt",h6(strong("Backward range (nt)"),style = "color:#97CBFF"),
-            value = 20, min = 1, max = 100000
+            "b_nt",h6(strong("Downstream range"),style = "color:#97CBFF"),
+            value = 20, min = 0, max = 1000000
           ),
           width = 6
         )
