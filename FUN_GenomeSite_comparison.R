@@ -27,13 +27,13 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
         p_lt[[i]] <- list()
         a <- n_row*(i-1)+1
         b <- n_row*i
-        p_lt[[i]][["anchor"]] <- lt[["anchor"]]
+        #p_lt[[i]][["anchor"]] <- lt[["anchor"]]
         p_lt[[i]][["target"]] <- lt[["target"]][a:b,]
       }else{
         p_lt[[i]] <- list()
         a <- n_row*(i-1)+1
         b <- nrow(lt[["target"]])
-        p_lt[[i]][["anchor"]] <- lt[["anchor"]]
+        #p_lt[[i]][["anchor"]] <- lt[["anchor"]]
         p_lt[[i]][["target"]] <- lt[["target"]][a:b,]
       }
     }
@@ -44,7 +44,7 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
     require(tidyverse)
     
     ## dataset input
-    anchor.df <- lt[["anchor"]]
+    #anchor.df <- lt[["anchor"]]
     target.df <- lt[["target"]]
     
     ## dataset setting 
@@ -87,6 +87,7 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
   applied.env <- new.env()
   applied.env[["f_nt"]] <- f_nt
   applied.env[["b_nt"]] <- b_nt
+  applied.env[["anchor.df"]] <- lt[["anchor"]]
 
   # comparison analysis
   if(applyParallel){
@@ -95,6 +96,7 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
     
     clusterExport(cl, "f_nt", envir = applied.env)
     clusterExport(cl, "b_nt", envir = applied.env)
+    clusterExport(cl, "anchor.df", envir = applied.env)
     output.lt <- parLapply(
       cl, p_lt, applied.FUN
     )
@@ -113,6 +115,7 @@ Genomesite_comparison <- function(lt, f_nt, b_nt, applyParallel=F, core=4){
     output.df <- output.df %>% arrange(A_ID)
 
   }else{
+    anchor.df <- lt[["anchor"]]
     output.df <- applied.FUN(lt)
     output.df <- output.df %>% arrange(A_ID)
   }
