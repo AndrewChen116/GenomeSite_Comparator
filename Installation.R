@@ -5,7 +5,6 @@
   install.packages("shiny")
   install.packages("tidyverse")
   install.packages("parallel")
-  install.packages("parallel")
   install.packages("bslib")
   install.packages("DT")
   
