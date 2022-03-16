@@ -110,11 +110,11 @@ server <- function(input, output, session) {
     assign("doExample",FALSE,globalenv())
     
     ## return
+    cat("******************** \n")
     list(
       "output" = output.df,
       "time" = print_time
     )
-    cat("******************** \n")
   })
 
   # export to ui
