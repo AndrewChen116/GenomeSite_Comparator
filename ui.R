@@ -98,7 +98,7 @@ ui <- navbarPage(
       br(),
       br(),
       ## version info
-      h6("20220315_KLC_v0.1.0",align="right",style = "color:#6C6C6C"),
+      h6("20220315_KLC_v0.1.1",align="right",style = "color:#6C6C6C"),
       ## width of sidebarPanel
       width = 3
       

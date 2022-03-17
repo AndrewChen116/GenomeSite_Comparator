@@ -1,30 +1,54 @@
 rm(list = ls())
 source("FUN_GenomeSite_comparison.R")
-load("default.RData")
 options(shiny.maxRequestSize=30*1024^2) 
 
 server <- function(input, output, session) {
  
+  # load the default Rdata
+  observeEvent(c(input$doSearch, input$doExample),{
+    if(length(ls(envir = globalenv()))==1){
+      load("default.RData")
+      assign("anchor.df",anchor.df,globalenv())
+      assign("target.df",target.df,globalenv())
+      cat("Import default setting\n")
+    }
+  })
+  
   # check if apply example
   observeEvent(input$doExample,{
     assign("doExample",TRUE,globalenv())
     cat("Example setting checked\n")
+
+  })
+  
+  # check the doExample status
+  observeEvent(c(input$doSearch, input$doExample),{
+    if(sum(ls(envir = globalenv()) %in% "doExample")){
+      cat("Import example:", doExample,"\n")
+    }else{
+      assign("doExample",FALSE,globalenv())
+      cat("import example:", doExample,"\n")
+    }
   })
   
   # Anchor and Target table input 
-  anchor_table <- eventReactive(c(input$doSearch, input$anchor_file, input$doExample),{
+  anchor_table <- eventReactive(c(input$doSearch, input$doExample),{
     ## record the start time
     t1 <- proc.time()
-    cat("Import example:", doExample,"\n")
+    
+    ## import data
     tryCatch(
       {
         if(!is.null(input$anchor_file$datapath)& !doExample){
           anchor.df <- input$anchor_file$datapath %>% read.csv(sep = "\t") 
+          colnames(anchor.df) <- c("id","chr","start","end","strand")
           cat("Imported anchor file checked\n")
-        }else{
+        }else if(doExample){
           cat("Example anchor file checked\n")
+        }else{
+          anchor.df <- NULL
+          cat("No anchor file imported\n")
         }
-        colnames(anchor.df) <- c("id","chr","start","end","strand")
       },
       warning = function(war){
         print(war)
@@ -39,16 +63,19 @@ server <- function(input, output, session) {
       "t1"=t1
     )
   })
-  target_table <- eventReactive(c(input$doSearch, input$target_file, input$doExample),{
+  target_table <- eventReactive(c(input$doSearch, input$doExample),{
     tryCatch(
       {
         if(!is.null(input$target_file$datapath) & !doExample){
           target.df <- input$target_file$datapath %>% read.csv(sep = "\t") 
+          colnames(target.df) <- c("id","chr","start","end","strand")
           cat("Imported target file checked\n")
-        }else{
+        }else if(doExample){
           cat("Example target file checked\n")
+        }else{
+          target.df <- NULL
+          cat("No target file imported\n")
         }
-        colnames(target.df) <- c("id","chr","start","end","strand")
       },
       warning = function(war){
         print(war)
@@ -87,6 +114,7 @@ server <- function(input, output, session) {
           
           cat("Comparation finished \n")
         }else{
+          cat("No imported data for compare, process stop\n")
           output.df <- NULL
         }
       },
@@ -108,7 +136,6 @@ server <- function(input, output, session) {
     ## reset doExample
     cat("Reset example setting\n")
     assign("doExample",FALSE,globalenv())
-    
     ## return
     cat("******************** \n")
     list(
