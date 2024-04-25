@@ -1,2 +1,2 @@
 # GenomeSite_comparison_shinyapp
-creater: KLC
+Maintainer: KLC
